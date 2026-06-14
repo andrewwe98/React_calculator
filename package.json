@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "postbuild": "cp dist/index.html dist/404.html",
     "preview": "vite preview",
     "build:docs": "npm run build && rm -rf docs && mkdir docs && cp -R dist/* docs/ && touch docs/.nojekyll",
     "predeploy": "npm run build",
