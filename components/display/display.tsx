@@ -1,10 +1,8 @@
-import React from 'react'
-
 type DisplayProps = {
   value: string
 }
 
-export const Display: React.FC<DisplayProps> = ({ value }) => {
+export function Display({ value }: DisplayProps) {
   return (
     <input
       type="text"
