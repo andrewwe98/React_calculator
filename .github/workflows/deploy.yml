@@ -3,12 +3,21 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.ts'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'scripts/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -45,3 +54,19 @@ jobs:
           publish_dir: ./out
           publish_branch: gh-pages
           force_orphan: true
+
+      - name: Publish static files to main for GitHub Pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          rsync -av out/ ./
+          git add index.html 404.html .nojekyll _next backend 404 index.txt 2>/dev/null || true
+          git add -u
+          if git diff --staged --quiet; then
+            echo "No static file changes to publish"
+          else
+            git commit -m "Deploy static site to GitHub Pages [skip ci]"
+            git push origin main
+          fi
