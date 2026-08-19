@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import type { ApiLogEntry } from '@/lib/calculator'
+import { apiGetLogs, isStaticApiMode } from '@/lib/api-client'
+import type { ApiLogEntry } from '@/lib/api-log'
 
 export default function BackendPage() {
   const [logs, setLogs] = useState<ApiLogEntry[]>([])
@@ -10,9 +11,8 @@ export default function BackendPage() {
 
   const fetchLogs = useCallback(async () => {
     try {
-      const res = await fetch('/api/logs')
-      const data = await res.json()
-      setLogs(data.logs ?? [])
+      const logs = await apiGetLogs()
+      setLogs(logs)
       setConnected(true)
     } catch {
       setConnected(false)
@@ -97,7 +97,9 @@ export default function BackendPage() {
           <div className="px-5 py-3 border-b border-slate-800 flex items-center justify-between">
             <h2 className="font-semibold text-green-400">Request Log</h2>
             <span className="text-xs text-slate-500 font-mono">
-              polling /api/logs every 1.5s
+              {isStaticApiMode()
+                ? 'client-side API (GitHub Pages)'
+                : 'polling /api/logs every 1.5s'}
             </span>
           </div>
 
@@ -184,11 +186,10 @@ export default function BackendPage() {
             <h3 className="font-semibold text-green-400 mb-3">Architecture</h3>
             <p className="text-sm text-slate-400 leading-relaxed">
               The calculator frontend uses{' '}
-              <code className="text-green-400">fetch()</code> to call Next.js
-              Route Handlers. All digit input and arithmetic operations are
-              processed on the server. This dashboard polls{' '}
-              <code className="text-green-400">/api/logs</code> to display
-              animated, real-time API activity.
+              <code className="text-green-400">fetch()</code> to call API
+              routes when running on a Node server. On GitHub Pages, the same
+              logic runs client-side via a static API shim. This dashboard
+              displays animated, real-time API activity.
             </p>
           </div>
         </div>

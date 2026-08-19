@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { addApiLog, appendDigit, parseNumber } from '@/lib/calculator'
+import { addApiLog } from '@/lib/api-log'
+import { appendDigit, parseNumber } from '@/lib/calculator'
 
 export async function POST(request: Request) {
   const start = Date.now()

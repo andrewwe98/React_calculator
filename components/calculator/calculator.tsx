@@ -3,41 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Display } from '@/components/display/display'
+import { apiCalculate, apiDigit } from '@/lib/api-client'
 
 type Operator = '+' | '-' | '*' | '/'
-
-async function fetchCalculate(a: string, b: string, operator: Operator) {
-  const res = await fetch('/api/calculate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ a, b, operator }),
-  })
-  const data = await res.json()
-  if (!res.ok) {
-    throw new Error(data.error ?? 'Calculation failed')
-  }
-  return data.result as string
-}
-
-async function fetchDigit(
-  value: string,
-  digit: string,
-  waitingForNewValue: boolean
-) {
-  const res = await fetch('/api/number', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value, digit, waitingForNewValue }),
-  })
-  const data = await res.json()
-  if (!res.ok) {
-    throw new Error(data.error ?? 'Number request failed')
-  }
-  return {
-    display: data.display as string,
-    waitingForNewValue: data.waitingForNewValue as boolean,
-  }
-}
 
 export function Calculator() {
   const [display, setDisplay] = useState('0')
@@ -49,7 +17,7 @@ export function Calculator() {
   const handleDigit = async (d: string) => {
     setLoading(true)
     try {
-      const result = await fetchDigit(display, d, waitingForNewValue)
+      const result = await apiDigit(display, d, waitingForNewValue)
       setDisplay(result.display)
       setWaitingForNewValue(result.waitingForNewValue)
     } catch {
@@ -63,7 +31,7 @@ export function Calculator() {
     setLoading(true)
     try {
       if (previous !== null && operator && !waitingForNewValue) {
-        const result = await fetchCalculate(previous, display, operator)
+        const result = await apiCalculate(previous, display, operator)
         setDisplay(result)
         setPrevious(result)
         setOperator(op)
@@ -84,7 +52,7 @@ export function Calculator() {
     if (previous === null || operator === null) return
     setLoading(true)
     try {
-      const result = await fetchCalculate(previous, display, operator)
+      const result = await apiCalculate(previous, display, operator)
       setDisplay(result)
       setPrevious(null)
       setOperator(null)
